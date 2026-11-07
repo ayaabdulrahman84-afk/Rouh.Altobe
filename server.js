@@ -431,7 +431,7 @@ const server = http.createServer((req, res) => {
 
               <!-- خدمة العملاء والواتساب -->
               <div class="support-box">
-                <a href="https://wa.me/054 424 6128?text=${encodeURIComponent('مرحباً، أود الاستفسار بخصوص طلبي رقم: ' + orderId)}" target="_blank" class="whatsapp-btn">
+                <a href="https://wa.me/967733781053?text=${encodeURIComponent('مرحباً، أود الاستفسار بخصوص طلبي رقم: ' + orderId)}" target="_blank" class="whatsapp-btn">
                   💬 تواصل معنا مباشرة عبر واتساب
                 </a>
                 <div class="support-note">إذا كان لديك أي تعديل على المقاسات أو استفسار، فريقنا في خدمتك دائماً.</div>
