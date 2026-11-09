@@ -511,6 +511,8 @@ const server = http.createServer((req, res) => {
             } catch (custErr) {
               console.error(`⚠️ تعذر إرسال إيميل العميل (${customerEmail}):`, custErr.message);
             }
+            } else {
+            console.log(`ℹ️ لم يتم إدخال بريد للعميل، تم تخطي إرسال إيميل الشكر للعميل بنجاح.`);
           }
 
           updateOrderStatus(orderId, adminSent ? 'email_sent' : 'saved_locally', {
