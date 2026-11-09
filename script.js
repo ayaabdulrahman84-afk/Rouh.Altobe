@@ -496,50 +496,46 @@ document.addEventListener('keydown', (e) => {
 
 /* ============================================================
    FORM SUBMISSION (Direct Backend API -> Gmail)
+   إرسال الطلب وتحويله للواتساب مباشرة برقم المتجر ورسالة العميل
 ============================================================ */
-async function submitOrder(event) {
-  if (event) event.preventDefault();
-  const btn = document.getElementById('confirm-btn');
-  if (!btn || btn.disabled) return;
 
-  // مراجع حقول البيانات
-  const nameEl = document.getElementById('full-name');
-  const phoneEl = document.getElementById('phone-number');
-  const emailEl = document.getElementById('email-address');
-  const notesEl = document.getElementById('notes');
+function submitOrder(event) {
+  if (event) event.preventDefault();
+  const btn = document.getElementById('confirm-btn');
+  if (!btn || btn.disabled) return;
 
-  const customerName = (nameEl ? nameEl.value : '').trim();
-  let customerPhone = (phoneEl ? phoneEl.value : '').trim();
-  const customerEmail = (emailEl ? emailEl.value : '').trim();
-  const notes = notesEl ? notesEl.value.trim() : '';
+  const nameEl = document.getElementById('full-name');
+  const phoneEl = document.getElementById('phone-number');
+  const emailEl = document.getElementById('email-address');
+  const notesEl = document.getElementById('notes');
 
-  // تحويل الأرقام العربية المشرقية (٠١٢٣٤٥٦٧٨٩) إلى أرقام إنجليزية
-  customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                               .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  const customerName = (nameEl ? nameEl.value : '').trim();
+  let customerPhone = (phoneEl ? phoneEl.value : '').trim();
+  const customerEmail = (emailEl ? emailEl.value : '').trim(); // اختياري تماماً
+  const notes = notesEl ? notesEl.value.trim() : '';
 
-  // التحقق المباشر من الحقول مع إظهار رسائل واضحة للعميل على الجوال
-  if (!customerName) {
-    showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
-    if (nameEl) nameEl.focus();
-    return;
-  }
+  customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                               .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
-  const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
-  if (!cleanPhone || cleanPhone.length < 8) {
-    showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
-    if (phoneEl) phoneEl.focus();
-    return;
-  }
+  if (!customerName) {
+    showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
+    if (nameEl) nameEl.focus();
+    return;
+  }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
+  if (!cleanPhone || cleanPhone.length < 8) {
+    showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
+    if (phoneEl) phoneEl.focus();
+    return;
+  }
 
-// ✅ : نتحقق من صحة البريد فقط إذا كتبه العميل (أما إذا ترك فارغاً فيتم تجاوز الشرط)
-if (customerEmail && !emailRegex.test(customerEmail)) {
-  showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
-  if (emailEl) emailEl.focus();
-  return;
-}
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (customerEmail && !emailRegex.test(customerEmail)) {
+    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+    if (emailEl) emailEl.focus();
+    return;
+  }
   // Collect size info
   let sizeText = '—';
   if (state.sizeMode === 'custom') {
