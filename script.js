@@ -59,7 +59,6 @@ function closeMobileMenu() {
 ============================================================ */
 function createParticles() {
   const container = document.getElementById('particles');
-  if (!container) return;
   const count = 25;
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
@@ -93,6 +92,7 @@ function initReveal() {
   els.forEach(el => observer.observe(el));
 }
 
+// Add reveal classes dynamically
 function addRevealClasses() {
   const sections = [
     '.trust-item',
@@ -104,7 +104,7 @@ function addRevealClasses() {
     '.footer-brand',
     '.footer-col'
   ];
-  sections.forEach((selector) => {
+  sections.forEach((selector, si) => {
     document.querySelectorAll(selector).forEach((el, i) => {
       el.classList.add('reveal');
       if (i > 0) el.classList.add(`reveal-delay-${Math.min(i, 3)}`);
@@ -228,15 +228,15 @@ document.querySelectorAll('.fabric-card').forEach(card => {
     state.selectedFabric = card.dataset.fabric;
     state.selectedFabricName = fabricNames[card.dataset.fabric] || card.dataset.fabric;
 
+    // Update hero showcase image to match selected thobe fabric
     if (fabricImages[card.dataset.fabric]) {
       changeHeroThobe(fabricImages[card.dataset.fabric]);
     }
 
+    // Enable next button
     const nextBtn = document.getElementById('next-to-2');
-    if (nextBtn) {
-      nextBtn.disabled = false;
-      nextBtn.style.opacity = '1';
-    }
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = '1';
 
     updatePreview();
     pulseSelection(card);
@@ -258,10 +258,8 @@ document.querySelectorAll('.color-card').forEach(card => {
     state.selectedColorName = card.dataset.colorName;
 
     const nextBtn = document.getElementById('next-to-3');
-    if (nextBtn) {
-      nextBtn.disabled = false;
-      nextBtn.style.opacity = '1';
-    }
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = '1';
 
     updatePreview();
     pulseSelection(card);
@@ -290,17 +288,17 @@ function switchSizeMode(mode) {
   const toggleCustom = document.getElementById('toggle-custom');
 
   if (mode === 'standard') {
-    if (standardPanel) standardPanel.classList.add('active');
-    if (customPanel) customPanel.classList.remove('active');
-    if (toggleStd) toggleStd.classList.add('active');
-    if (toggleCustom) toggleCustom.classList.remove('active');
+    standardPanel.classList.add('active');
+    customPanel.classList.remove('active');
+    toggleStd.classList.add('active');
+    toggleCustom.classList.remove('active');
     state.selectedSize = null;
     updatePreview();
   } else {
-    if (customPanel) customPanel.classList.add('active');
-    if (standardPanel) standardPanel.classList.remove('active');
-    if (toggleCustom) toggleCustom.classList.add('active');
-    if (toggleStd) toggleStd.classList.remove('active');
+    customPanel.classList.add('active');
+    standardPanel.classList.remove('active');
+    toggleCustom.classList.add('active');
+    toggleStd.classList.remove('active');
     state.selectedSize = 'مقاسات مخصصة';
     updatePreview();
   }
@@ -334,6 +332,7 @@ function applyPresetSize(neck, height, shoulder, sleeve) {
   updatePreview();
 }
 
+// Listen to custom measurement inputs
 ['neck-size', 'height-size', 'shoulder-size', 'sleeve-size'].forEach(id => {
   const el = document.getElementById(id);
   if (el) {
@@ -348,13 +347,9 @@ function applyPresetSize(neck, height, shoulder, sleeve) {
    UPDATE SUMMARY PREVIEW
 ============================================================ */
 function updatePreview() {
-  const pf = document.getElementById('preview-fabric');
-  const pc = document.getElementById('preview-color');
-  const ps = document.getElementById('preview-size');
-
-  if (pf) pf.textContent = state.selectedFabricName || 'لم يتم الاختيار';
-  if (pc) pc.textContent = state.selectedColorName || 'لم يتم الاختيار';
-  if (ps) ps.textContent = state.selectedSize || 'لم يتم الاختيار';
+  document.getElementById('preview-fabric').textContent = state.selectedFabricName || 'لم يتم الاختيار';
+  document.getElementById('preview-color').textContent = state.selectedColorName || 'لم يتم الاختيار';
+  document.getElementById('preview-size').textContent = state.selectedSize || 'لم يتم الاختيار';
 
   let filledCount = 0;
   if (state.selectedFabric) filledCount++;
@@ -382,21 +377,22 @@ function updatePreview() {
 function goToStep(step) {
   if (step === state.currentStep) return;
 
+  // Validation when going forward
   if (step > 1 && !state.selectedFabric) {
-    const fg = document.querySelector('.fabric-grid-main');
-    if (fg) pulseSelection(fg);
+    pulseSelection(document.querySelector('.fabric-grid-main'));
     return;
   }
   if (step > 2 && !state.selectedColor) {
-    const cg = document.querySelector('.color-grid');
-    if (cg) pulseSelection(cg);
+    pulseSelection(document.querySelector('.color-grid'));
     return;
   }
 
+  // Toggle Panels
   document.querySelectorAll('.step-panel').forEach((p, idx) => {
     p.classList.toggle('active', idx + 1 === step);
   });
 
+  // Toggle Indicators
   for (let i = 1; i <= 3; i++) {
     const ind = document.getElementById(`step-indicator-${i}`);
     if (ind) {
@@ -411,11 +407,13 @@ function goToStep(step) {
     }
   }
 
+  // Toggle Lines
   const line12 = document.getElementById('line-1-2');
   const line23 = document.getElementById('line-2-3');
   if (line12) line12.classList.toggle('filled', step >= 2);
   if (line23) line23.classList.toggle('filled', step >= 3);
 
+  // Update Status Meter Bar
   const meterFill = document.getElementById('statusMeterFill');
   const stepTitle = document.getElementById('statusStepTitle');
   const stepPercent = document.getElementById('statusPercent');
@@ -433,8 +431,7 @@ function goToStep(step) {
   if (stepPercent) stepPercent.textContent = percents[step - 1];
 
   state.currentStep = step;
-  const builderEl = document.getElementById('builder');
-  if (builderEl) builderEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function nextStep(step) {
@@ -445,16 +442,20 @@ function prevStep(step) {
   goToStep(step);
 }
 
+// Disable next buttons initially (handled by disabled attribute in HTML)
+// But style them for the disabled state
+document.querySelectorAll('.step-next[disabled]').forEach(btn => {
+  btn.style.opacity = '0.5';
+  btn.style.cursor = 'not-allowed';
+});
+
 /* ============================================================
    ORDER MODAL
 ============================================================ */
 function openOrderModal() {
-  const mf = document.getElementById('modal-fabric');
-  const mc = document.getElementById('modal-color');
-  const ms = document.getElementById('modal-size');
-
-  if (mf) mf.textContent = state.selectedFabricName || '—';
-  if (mc) mc.textContent = state.selectedColorName || '—';
+  // Populate modal summary
+  document.getElementById('modal-fabric').textContent = state.selectedFabricName || '—';
+  document.getElementById('modal-color').textContent = state.selectedColorName || '—';
 
   let sizeText = '—';
   if (state.sizeMode === 'custom') {
@@ -466,44 +467,42 @@ function openOrderModal() {
   } else {
     sizeText = state.selectedSize || '—';
   }
-  if (ms) ms.textContent = sizeText;
+  document.getElementById('modal-size').textContent = sizeText;
 
   const overlay = document.getElementById('orderModal');
-  if (overlay) {
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    const modalCard = overlay.querySelector('.modal-card');
-    if (modalCard) modalCard.scrollTop = 0;
-  }
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  // إعادة تمرير القالب لأعلى لضمان رؤية البيانات كاملة على الجوال
+  const modalCard = overlay.querySelector('.modal-card');
+  if (modalCard) modalCard.scrollTop = 0;
 }
 
 function closeOrderModal() {
   const overlay = document.getElementById('orderModal');
-  if (overlay) {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-const orderModalEl = document.getElementById('orderModal');
-if (orderModalEl) {
-  orderModalEl.addEventListener('click', function(e) {
-    if (e.target === this) closeOrderModal();
-  });
-}
+// Close modal on backdrop click
+document.getElementById('orderModal').addEventListener('click', function(e) {
+  if (e.target === this) closeOrderModal();
+});
 
+// Escape key
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeOrderModal();
 });
 
 /* ============================================================
-   FORM SUBMISSION (WhatsApp Direct - البريد اختياري ورقم العميل محفوظ)
+   FORM SUBMISSION (Direct Backend API -> Gmail)
 ============================================================ */
-function submitOrder(event) {
+async function submitOrder(event) {
   if (event) event.preventDefault();
   const btn = document.getElementById('confirm-btn');
-  if (btn && btn.disabled) return;
+  if (!btn || btn.disabled) return;
 
+  // مراجع حقول البيانات
   const nameEl = document.getElementById('full-name');
   const phoneEl = document.getElementById('phone-number');
   const emailEl = document.getElementById('email-address');
@@ -511,12 +510,14 @@ function submitOrder(event) {
 
   const customerName = (nameEl ? nameEl.value : '').trim();
   let customerPhone = (phoneEl ? phoneEl.value : '').trim();
-  const customerEmail = (emailEl ? emailEl.value : '').trim(); // اختياري تماماً
+  const customerEmail = (emailEl ? emailEl.value : '').trim();
   const notes = notesEl ? notesEl.value.trim() : '';
 
+  // تحويل الأرقام العربية المشرقية (٠١٢٣٤٥٦٧٨٩) إلى أرقام إنجليزية
   customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
                                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
+  // التحقق المباشر من الحقول مع إظهار رسائل واضحة للعميل على الجوال
   if (!customerName) {
     showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
     if (nameEl) nameEl.focus();
@@ -530,13 +531,16 @@ function submitOrder(event) {
     return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (customerEmail && !emailRegex.test(customerEmail)) {
-    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
-    if (emailEl) emailEl.focus();
-    return;
-  }
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// ✅ : نتحقق من صحة البريد فقط إذا كتبه العميل (أما إذا ترك فارغاً فيتم تجاوز الشرط)
+if (customerEmail && !emailRegex.test(customerEmail)) {
+  showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+  if (emailEl) emailEl.focus();
+  return;
+}
+
+  // Collect size info
   let sizeText = '—';
   if (state.sizeMode === 'custom') {
     const n = document.getElementById('neck-size') ? document.getElementById('neck-size').value : '';
@@ -548,30 +552,114 @@ function submitOrder(event) {
     sizeText = state.selectedSize || '—';
   }
 
-  const whatsappMessage = 
-    `*طلب تفصيل ثوب جديد (روح الثوب)* %0a` +
-    `---------------------------------- %0a` +
-    `👤 *الاسم:* ${customerName} %0a` +
-    `📱 *رقم الجوال:* ${customerPhone} %0a` +
-    `✉️ *البريد:* ${customerEmail || 'لم يتم الإدخال (اختياري)'} %0a` +
-    `🧵 *القماش:* ${state.selectedFabricName || '—'} %0a` +
-    `🎨 *اللون:* ${state.selectedColorName || '—'} %0a` +
-    `📏 *المقاس:* ${sizeText} %0a` +
-    `📝 *ملاحظات:* ${notes || 'لا توجد ملاحظات'} %0a` +
-    `----------------------------------`;
+  // Build order payload
+  const orderData = {
+    customer_name: customerName,
+    customer_phone: customerPhone,
+    customer_email: customerEmail,
+    fabric: state.selectedFabricName || '—',
+    color: state.selectedColorName || '—',
+    size: sizeText,
+    notes: notes || 'لا توجد ملاحظات'
+  };
 
-  // 📌 ضعِي رقم واتساب متجرك الخاص هنا بالصيغة الدولية لاستقبال الطلبات:
-  const storeWhatsAppNumber = "966500000000"; 
+  // Animate button
+  const originalBtnHtml = `<span>تأكيد الطلب والإرسال</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>`;
+  btn.innerHTML = `<span>جارٍ إرسال الطلب...</span> <div class="loader-dots"><span></span><span></span><span></span></div>`;
+  btn.disabled = true;
+  addLoaderStyle();
 
-  closeOrderModal();
-  document.body.style.overflow = '';
-  const orderFormEl = document.getElementById('orderForm');
-  if (orderFormEl) orderFormEl.reset();
+  // تنبيه العميل بلباقة في حال استغرق السيرفر السحابي بضع ثوانٍ للاستيقاظ
+  const wakingNoticeTimer = setTimeout(() => {
+    if (btn.disabled) {
+      btn.innerHTML = `<span>جارٍ تأكيد الطلب مع السيرفر...</span> <div class="loader-dots"><span></span><span></span><span></span></div>`;
+    }
+  }, 7000);
 
-  const whatsappUrl = `https://wa.me/${storeWhatsAppNumber}?text=${whatsappMessage}`;
-  window.open(whatsappUrl, '_blank');
+  // تحديد رابط الـ API بذكاء (يعمل سواء فُتح الموقع من السيرفر أو بالنقر المباشر على الملف)
+  const apiUrl = (window.location.origin && window.location.origin.startsWith('http'))
+    ? '/api/order'
+    : 'http://localhost:3000/api/order';
 
-  showToast('تم تجهيز طلبك بنجاح!', 'جاري تحويلك إلى الواتساب لإرسال الطلب');
+  const controller = new AbortController();
+  // ضبط مهلة الانتظار إلى 60 ثانية كاملة لضمان استيعاب وقت استيقاظ السيرفر السحابي
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    clearTimeout(wakingNoticeTimer);
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      closeOrderModal();
+      document.body.style.overflow = '';
+      btn.innerHTML = originalBtnHtml;
+      btn.disabled = false;
+      showToast(result.message || 'تم إرسال طلبك بنجاح!', 'سيتواصل معك فريقنا خلال ٢٤ ساعة');
+      document.getElementById('orderForm').reset();
+    } else {
+      throw new Error(result.error || 'فشل في تسجيل الطلب');
+    }
+  } catch (error) {
+    clearTimeout(timeoutId);
+    clearTimeout(wakingNoticeTimer);
+    console.error('Order Submission Error:', error);
+
+    let errorTitle = 'تعذر إرسال الطلب';
+    let errorDetail = 'حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً';
+
+    if (!navigator.onLine) {
+      errorTitle = 'لا يوجد اتصال بالإنترنت';
+      errorDetail = 'يرجى التحقق من اتصال الشبكة وإعادة المحاولة';
+    } else if (error.name === 'AbortError') {
+      errorTitle = 'استغرق الطلب وقتاً طويلاً';
+      errorDetail = 'السيرفر يستغرق وقتاً للاستيقاظ، يرجى إعادة المحاولة الآن';
+    } else if (error.message && (error.message.includes('Failed to fetch') || error.name === 'TypeError')) {
+      errorTitle = 'السيرفر غير متصل';
+      errorDetail = 'يرجى تشغيل السيرفر أولاً عبر النقر على run.bat';
+    } else if (error.message) {
+      errorDetail = error.message;
+    }
+
+    btn.innerHTML = `<span>${errorTitle}</span>`;
+    showToast(errorTitle, errorDetail, true);
+    btn.disabled = false;
+
+    setTimeout(() => {
+      btn.innerHTML = originalBtnHtml;
+    }, 4000);
+  }
+}
+
+function addLoaderStyle() {
+  if (document.getElementById('loader-style')) return;
+  const style = document.createElement('style');
+  style.id = 'loader-style';
+  style.textContent = `
+    .loader-dots { display: flex; gap: 4px; align-items: center; }
+    .loader-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(13,13,18,0.7);
+      animation: dot-bounce 1.4s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1.2); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 function showToast(title = 'تم إرسال طلبك بنجاح!', subtitle = 'سيتواصل معك فريقنا خلال ٢٤ ساعة', isError = false) {
@@ -596,11 +684,17 @@ function showToast(title = 'تم إرسال طلبك بنجاح!', subtitle = '�
   setTimeout(() => toast.classList.remove('show'), 5000);
 }
 
+/* ============================================================
+   PULSE ANIMATION ON SELECTION
+============================================================ */
 function pulseSelection(el) {
   el.style.transform = 'scale(1.02)';
   setTimeout(() => { el.style.transform = ''; }, 300);
 }
 
+/* ============================================================
+   SMOOTH ACTIVE NAV LINK
+============================================================ */
 const sections = document.querySelectorAll('section[id], footer[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 
@@ -619,6 +713,9 @@ const sectionObserver = new IntersectionObserver((entries) => {
 
 sections.forEach(sec => sectionObserver.observe(sec));
 
+/* ============================================================
+   HERO BUTTON INTERACTION
+============================================================ */
 const heroCta = document.getElementById('hero-cta');
 if (heroCta) {
   heroCta.addEventListener('mouseenter', () => {
@@ -629,10 +726,17 @@ if (heroCta) {
   });
 }
 
+/* ============================================================
+   FABRIC CARD FOCUS KEYBOARD NAV
+============================================================ */
 document.querySelectorAll('.fabric-card, .color-card').forEach(card => {
   card.setAttribute('tabindex', '0');
 });
 
+/* ============================================================
+   NUMBER INPUT ARABIZE (Display Only)
+============================================================ */
+// Keep inputs as standard numbers but validate on blur
 document.querySelectorAll('.measure-input').forEach(input => {
   input.addEventListener('blur', () => {
     const val = parseFloat(input.value);
@@ -645,6 +749,9 @@ document.querySelectorAll('.measure-input').forEach(input => {
   });
 });
 
+/* ============================================================
+   THOBE SVG COLOR PREVIEW
+============================================================ */
 const colorMap = {
   'off-white': '#FAF7F2',
   'bright-white': '#FFFFFF',
@@ -676,9 +783,13 @@ function shadeColor(hex, percent) {
   return '#' + ((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1);
 }
 
+/* ============================================================
+   INIT & MOBILE TOUCH HANDLING
+============================================================ */
 console.log('%c روح الثوب 🏆', 'color: #B8891B; font-size: 20px; font-weight: bold;');
 console.log('%c أناقة تتجسد في تفاصيلك', 'color: #C69A2B; font-size: 14px;');
 
+// ضمان استجابة زر تأكيد الطلب الفورية عند النقر أو اللمس على الجوال
 const confirmButtonEl = document.getElementById('confirm-btn');
 if (confirmButtonEl) {
   confirmButtonEl.addEventListener('click', (e) => {
@@ -686,4 +797,4 @@ if (confirmButtonEl) {
       submitOrder(e);
     }
   });
-});
+}
