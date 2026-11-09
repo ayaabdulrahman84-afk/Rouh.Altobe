@@ -531,12 +531,14 @@ async function submitOrder(event) {
     return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!customerEmail || !emailRegex.test(customerEmail)) {
-    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح لاستلام رسالة تأكيد الطلب', true);
-    if (emailEl) emailEl.focus();
-    return;
-  }
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ✅ : نتحقق من صحة البريد فقط إذا كتبه العميل (أما إذا ترك فارغاً فيتم تجاوز الشرط)
+if (customerEmail && !emailRegex.test(customerEmail)) {
+  showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+  if (emailEl) emailEl.focus();
+  return;
+}
 
   // Collect size info
   let sizeText = '—';
