@@ -227,12 +227,16 @@ const server = http.createServer((req, res) => {
       try {
         const order = JSON.parse(body || '{}');
 
-        // التحقق من الحقول الأساسية
+      // التحقق من الحقول الأساسية (الاسم ورقم الجوال فقط، والبريد اختياري)
         if (!order.customer_name || !order.customer_phone) {
           res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({ success: false, error: 'يرجى إدخال اسم العميل ورقم الجوال' }));
           return;
         }
+
+        // تنظيف وحفظ البريد الإلكتروني إذا تم إدخاله، أو تعيينه كاختياري
+        const customerEmailInput = (order.customer_email || '').trim();
+        const hasValidEmail = customerEmailInput && customerEmailInput.includes('@');
 
         // 1. حفظ الطلب محلياً فوراً لحمايته من أي ضياع
         const savedOrder = saveOrderLocally(order);
