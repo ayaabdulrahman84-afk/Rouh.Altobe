@@ -495,14 +495,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ============================================================
-   FORM SUBMISSION (Direct Backend API -> Gmail)
+   FORM SUBMISSION (WhatsApp Direct - فتح الواتساب برقم العميل وتفاصيل الطلب)
 ============================================================ */
-async function submitOrder(event) {
+function submitOrder(event) {
   if (event) event.preventDefault();
   const btn = document.getElementById('confirm-btn');
   if (!btn || btn.disabled) return;
 
-  // مراجع حقول البيانات
   const nameEl = document.getElementById('full-name');
   const phoneEl = document.getElementById('phone-number');
   const emailEl = document.getElementById('email-address');
@@ -510,14 +509,13 @@ async function submitOrder(event) {
 
   const customerName = (nameEl ? nameEl.value : '').trim();
   let customerPhone = (phoneEl ? phoneEl.value : '').trim();
-  const customerEmail = (emailEl ? emailEl.value : '').trim();
+  const customerEmail = (emailEl ? emailEl.value : '').trim(); // اختياري تماماً
   const notes = notesEl ? notesEl.value.trim() : '';
 
-  // تحويل الأرقام العربية المشرقية (٠١٢٣٤٥٦٧٨٩) إلى أرقام إنجليزية
+  // تحويل الأرقام العربية إلى إنجليزية
   customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
                                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
-  // التحقق المباشر من الحقول مع إظهار رسائل واضحة للعميل على الجوال
   if (!customerName) {
     showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
     if (nameEl) nameEl.focus();
@@ -527,7 +525,55 @@ async function submitOrder(event) {
   const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
   if (!cleanPhone || cleanPhone.length < 8) {
     showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
-    if (phoneEl) phoneEl.focus();
+  }
+
+  // البريد اختياري تماماً ولن يعترض الموقع إن ترك فارغاً
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (customerEmail && !emailRegex.test(customerEmail)) {
+    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+    if (emailEl) emailEl.focus();
+    return;
+  }
+
+  let sizeText = '—';
+  if (state.sizeMode === 'custom') {
+    const n = document.getElementById('neck-size') ? document.getElementById('neck-size').value : '';
+    const h = document.getElementById('height-size') ? document.getElementById('height-size').value : '';
+    const sh = document.getElementById('shoulder-size') ? document.getElementById('shoulder-size').value : '';
+    const sl = document.getElementById('sleeve-size') ? document.getElementById('sleeve-size').value : '';
+    sizeText = `رقبة ${n || '—'}سم | طول ${h || '—'}سم | كتف ${sh || '—'}سم | أكمام ${sl || '—'}سم`;
+  } else {
+    sizeText = state.selectedSize || '—';
+  }
+
+  // صياغة رسالة الواتساب المتضمنة لرقم وعنوان العميل وتفاصيل طلبه
+  const whatsappMessage = 
+    `*طلب تفصيل ثوب جديد (روح الثوب)* %0a` +
+    `---------------------------------- %0a` +
+    `👤 *اسم العميل:* ${customerName} %0a` +
+    `📱 *رقم جوال العميل:* ${customerPhone} %0a` +
+    `✉️ *البريد الإلكتروني:* ${customerEmail || 'غير مسجل (اختياري)'} %0a` +
+    `🧵 *القماش:* ${state.selectedFabricName || '—'} %0a` +
+    `🎨 *اللون:* ${state.selectedColorName || '—'} %0a` +
+    `📏 *المقاس:* ${sizeText} %0a` +
+    `📝 *ملاحظات:* ${notes || 'لا توجد ملاحظات'} %0a` +
+    `----------------------------------`;
+
+  // 📌 رقم واتساب متجرك الخاص لاستقبال الطلبات:
+  const storeWhatsAppNumber = "966500000000"; 
+
+  // إغلاق النافذة وتفريغ النموذج
+  closeOrderModal();
+  document.body.style.overflow = '';
+  const orderFormEl = document.getElementById('orderForm');
+  if (orderFormEl) orderFormEl.reset();
+
+  // فتح رابط الواتساب مباشرة برقم العميل وبياناته
+  const whatsappUrl = `https://wa.me/${storeWhatsAppNumber}?text=${whatsappMessage}`;
+  window.open(whatsappUrl, '_blank');
+
+  showToast('تم تجهيز طلبك بنجاح!', 'جاري تحويلك إلى الواتساب لإرسال الطلب');
+  if (phoneEl) phoneEl.focus();
     return;
   }
 
