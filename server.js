@@ -431,7 +431,7 @@ const server = http.createServer((req, res) => {
 
               <!-- خدمة العملاء والواتساب -->
               <div class="support-box">
-                <a href="https://wa.me/967733781053?text=${encodeURIComponent('مرحباً، أود الاستفسار بخصوص طلبي رقم: ' + orderId)}" target="_blank" class="whatsapp-btn">
+                <a href="https://wa.me/967778245445?text=${encodeURIComponent('مرحباً، أود الاستفسار بخصوص طلبي رقم: ' + orderId)}" target="_blank" class="whatsapp-btn">
                   💬 تواصل معنا مباشرة عبر واتساب
                 </a>
                 <div class="support-note">إذا كان لديك أي تعديل على المقاسات أو استفسار، فريقنا في خدمتك دائماً.</div>
@@ -511,8 +511,6 @@ const server = http.createServer((req, res) => {
             } catch (custErr) {
               console.error(`⚠️ تعذر إرسال إيميل العميل (${customerEmail}):`, custErr.message);
             }
-            } else {
-            console.log(`ℹ️ لم يتم إدخال بريد للعميل، تم تخطي إرسال إيميل الشكر للعميل بنجاح.`);
           }
 
           updateOrderStatus(orderId, adminSent ? 'email_sent' : 'saved_locally', {

@@ -495,13 +495,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ============================================================
-   FORM SUBMISSION (WhatsApp Direct - البريد اختياري 100% ويفتح الواتساب برقم العميل)
+   FORM SUBMISSION (Direct Backend API -> Gmail)
 ============================================================ */
-function submitOrder(event) {
+async function submitOrder(event) {
   if (event) event.preventDefault();
   const btn = document.getElementById('confirm-btn');
-  if (btn && btn.disabled) return;
+  if (!btn || btn.disabled) return;
 
+  // مراجع حقول البيانات
   const nameEl = document.getElementById('full-name');
   const phoneEl = document.getElementById('phone-number');
   const emailEl = document.getElementById('email-address');
@@ -509,21 +510,20 @@ function submitOrder(event) {
 
   const customerName = (nameEl ? nameEl.value : '').trim();
   let customerPhone = (phoneEl ? phoneEl.value : '').trim();
-  const customerEmail = (emailEl ? emailEl.value : '').trim(); // ✅ اختياري تماماً ولن يجبر العميل عليه
+  const customerEmail = (emailEl ? emailEl.value : '').trim();
   const notes = notesEl ? notesEl.value.trim() : '';
 
-  // تحويل الأرقام العربية إلى إنجليزية
+  // تحويل الأرقام العربية المشرقية (٠١٢٣٤٥٦٧٨٩) إلى أرقام إنجليزية
   customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
                                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
-  // 1. التحقق من الاسم (إلزامي)
+  // التحقق المباشر من الحقول مع إظهار رسائل واضحة للعميل على الجوال
   if (!customerName) {
     showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
     if (nameEl) nameEl.focus();
     return;
   }
 
-  // 2. التحقق من رقم الجوال (إلزامي)
   const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
   if (!cleanPhone || cleanPhone.length < 8) {
     showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
@@ -531,15 +531,14 @@ function submitOrder(event) {
     return;
   }
 
-  // 3. البريد الإلكتروني (اختياري تماماً - يتحقق منه فقط إذا كتبه العميل)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (customerEmail && !emailRegex.test(customerEmail)) {
-    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+  if (!customerEmail || !emailRegex.test(customerEmail)) {
+    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح لاستلام رسالة تأكيد الطلب', true);
     if (emailEl) emailEl.focus();
     return;
   }
 
-  // جمع المقاسات
+  // Collect size info
   let sizeText = '—';
   if (state.sizeMode === 'custom') {
     const n = document.getElementById('neck-size') ? document.getElementById('neck-size').value : '';
@@ -551,34 +550,6 @@ function submitOrder(event) {
     sizeText = state.selectedSize || '—';
   }
 
-  // تجهيز نص رسالة الواتساب المتضمنة لرقم وعنوان العميل
-  const whatsappMessage = 
-    `*طلب تفصيل ثوب جديد (روح الثوب)* %0a` +
-    `---------------------------------- %0a` +
-    `👤 *الاسم:* ${customerName} %0a` +
-    `📱 *رقم الجوال العميل:* ${customerPhone} %0a` +
-    `✉️ *البريد:* ${customerEmail || 'لم يتم الإدخال (اختياري)'} %0a` +
-    `🧵 *القماش:* ${state.selectedFabricName || '—'} %0a` +
-    `🎨 *اللون:* ${state.selectedColorName || '—'} %0a` +
-    `📏 *المقاس:* ${sizeText} %0a` +
-    `📝 *ملاحظات:* ${notes || 'لا توجد ملاحظات'} %0a` +
-    `----------------------------------`;
-
-  // 📌 رقم واتساب الخاص بمتجرك لاستقبال الطلبات:
-  const storeWhatsAppNumber = "966500000000"; 
-
-  // إغلاق نافذة الطلب وتنظيف الحقول
-  closeOrderModal();
-  document.body.style.overflow = '';
-  const orderFormEl = document.getElementById('orderForm');
-  if (orderFormEl) orderFormEl.reset();
-
-  // فتح رابط الواتساب مباشرة برقم العميل وبياناته بالكامل
-  const whatsappUrl = `https://wa.me/${storeWhatsAppNumber}?text=${whatsappMessage}`;
-  window.open(whatsappUrl, '_blank');
-
-  showToast('تم تجهيز طلبك بنجاح!', 'جاري تحويلك إلى الواتساب لإرسال الطلب');
-}
   // Build order payload
   const orderData = {
     customer_name: customerName,
