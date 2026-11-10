@@ -530,11 +530,12 @@ document.addEventListener('keydown', (e) => {
   }
 
   // البريد اختياري تماماً ولن يعترض الموقع إن ترك فارغاً
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!customerEmail && !emailRegex.test(customerEmail)) {
-    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
-    if (emailEl) emailEl.focus();
-    return;
+  //const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //if (!customerEmail && !emailRegex.test(customerEmail)) {
+  //  showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
+  //  if (emailEl) emailEl.focus();
+   // return;
+     const customerEmail = (emailEl ? emailEl.value : '').trim();
   }
 
   let sizeText = '—';
