@@ -504,18 +504,21 @@ const server = http.createServer((req, res) => {
           // فاصل زمني بسيط لتفادي أي تداخل
           await new Promise(r => setTimeout(r, 800));
 
-          // ثانياً: إرسال بريد العميل التسويقي والتأكيدي
-          const customerEmail = (order.customer_email || '').trim();
-          if (customerEmail && customerEmail.includes('@')) {
-            try {
-              customerMailOptions.to = customerEmail;
-              await sendEmail(customerMailOptions);
-              customerSent = true;
-              console.log(`💌 تم إرسال رسالة الشكر والتأكيد التسويقية لبريد العميل: ${customerEmail} [${USE_RESEND ? 'Resresend' : USE_BREVO ? 'Brevo' : 'Gmail'}]`);
-            } catch (custErr) {
-              console.error(`⚠️ تعذر إرسال إيميل العميل (${customerEmail}):`, custErr.message);
-            }
+       // ثانياً: إرسال بريد العميل التسويقي والتأكيدي (اختياري تماماً - إن لم يكتب العميل بريداً يتم تخطيه بأمان)
+        const customerEmail = (order.customer_email || '').trim();
+        if (customerEmail && customerEmail !== '' && customerEmail.includes('@')) {
+          try {
+            customerMailOptions.to = customerEmail;
+            await sendEmail(customerMailOptions);
+            customerSent = true;
+            console.log(`💌 تم إرسال رسالة الشكر والتأكيد التسويقية لبريد العميل: ${customerEmail}`);
+          } catch (custErr) {
+            console.error(`⚠️ تعذر إرسال إيميل العميل:`, custErr.message);
           }
+        } else {
+          console.log(`ℹ️ العميل لم يقم بإدخال بريد إلكتروني (الحقل اختياري)، تم تخطي إرسال إيميل العميل بنجاح.`);
+          customerSent = true;
+        }
 
           updateOrderStatus(orderId, adminSent ? 'email_sent' : 'saved_locally', {
             adminEmail: adminSent,
