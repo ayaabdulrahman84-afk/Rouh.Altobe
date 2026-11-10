@@ -481,7 +481,7 @@ function openOrderModal() {
 function closeOrderModal() {
   const overlay = document.getElementById('orderModal');
   overlay.classList.remove('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = '';
 }
 
 // Close modal on backdrop click
@@ -495,13 +495,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ============================================================
-   FORM SUBMISSION (WhatsApp Direct - فتح الواتساب برقم العميل وتفاصيل الطلب)
+   FORM SUBMISSION (Direct Backend API -> Gmail)
 ============================================================ */
-   async function submitOrder(event) {
+async function submitOrder(event) {
   if (event) event.preventDefault();
   const btn = document.getElementById('confirm-btn');
   if (!btn || btn.disabled) return;
 
+  // مراجع حقول البيانات
   const nameEl = document.getElementById('full-name');
   const phoneEl = document.getElementById('phone-number');
   const emailEl = document.getElementById('email-address');
@@ -509,13 +510,14 @@ document.addEventListener('keydown', (e) => {
 
   const customerName = (nameEl ? nameEl.value : '').trim();
   let customerPhone = (phoneEl ? phoneEl.value : '').trim();
-  const customerEmail = (emailEl ? emailEl.value : '').trim(); // اختياري تماماً
+  const customerEmail = (emailEl ? emailEl.value : '').trim();
   const notes = notesEl ? notesEl.value.trim() : '';
 
-  // تحويل الأرقام العربية إلى إنجليزية
+  // تحويل الأرقام العربية المشرقية (٠١٢٣٤٥٦٧٨٩) إلى أرقام إنجليزية
   customerPhone = customerPhone.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
                                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
+  // التحقق المباشر من الحقول مع إظهار رسائل واضحة للعميل على الجوال
   if (!customerName) {
     showToast('يرجى كتابة الاسم', 'الاسم مطلوب لإتمام الطلب وتأكيد الحجز', true);
     if (nameEl) nameEl.focus();
@@ -525,19 +527,18 @@ document.addEventListener('keydown', (e) => {
   const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
   if (!cleanPhone || cleanPhone.length < 8) {
     showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
-     if (phoneEl) phoneEl.focus();
+    if (phoneEl) phoneEl.focus();
     return;
   }
 
-  // البريد اختياري تماماً ولن يعترض الموقع إن ترك فارغاً
-  //const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //if (!customerEmail && !emailRegex.test(customerEmail)) {
-  //  showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
-  //  if (emailEl) emailEl.focus();
-   // return;
-     const customerEmail = (emailEl ? emailEl.value : '').trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!customerEmail || !emailRegex.test(customerEmail)) {
+    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح لاستلام رسالة تأكيد الطلب', true);
+    if (emailEl) emailEl.focus();
+    return;
   }
 
+  // Collect size info
   let sizeText = '—';
   if (state.sizeMode === 'custom') {
     const n = document.getElementById('neck-size') ? document.getElementById('neck-size').value : '';
@@ -548,6 +549,7 @@ document.addEventListener('keydown', (e) => {
   } else {
     sizeText = state.selectedSize || '—';
   }
+
   // Build order payload
   const orderData = {
     customer_name: customerName,
@@ -559,7 +561,7 @@ document.addEventListener('keydown', (e) => {
     notes: notes || 'لا توجد ملاحظات'
   };
 
- // Animate button
+  // Animate button
   const originalBtnHtml = `<span>تأكيد الطلب والإرسال</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>`;
   btn.innerHTML = `<span>جارٍ إرسال الطلب...</span> <div class="loader-dots"><span></span><span></span><span></span></div>`;
   btn.disabled = true;
