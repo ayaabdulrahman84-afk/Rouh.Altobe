@@ -545,56 +545,6 @@ function submitOrder(event) {
   } else {
     sizeText = state.selectedSize || '—';
   }
-
-  // صياغة رسالة الواتساب المتضمنة لرقم وعنوان العميل وتفاصيل طلبه
-  const whatsappMessage = 
-    `*طلب تفصيل ثوب جديد (روح الثوب)* %0a` +
-    `---------------------------------- %0a` +
-    `👤 *اسم العميل:* ${customerName} %0a` +
-    `📱 *رقم جوال العميل:* ${customerPhone} %0a` +
-    `✉️ *البريد الإلكتروني:* ${customerEmail || 'غير مسجل (اختياري)'} %0a` +
-    `🧵 *القماش:* ${state.selectedFabricName || '—'} %0a` +
-    `🎨 *اللون:* ${state.selectedColorName || '—'} %0a` +
-    `📏 *المقاس:* ${sizeText} %0a` +
-    `📝 *ملاحظات:* ${notes || 'لا توجد ملاحظات'} %0a` +
-    `----------------------------------`;
-
-  // 📌 رقم واتساب متجرك الخاص لاستقبال الطلبات:
-  const storeWhatsAppNumber = "966500000000"; 
-
-  // إغلاق النافذة وتفريغ النموذج
-  closeOrderModal();
-  document.body.style.overflow = '';
-  const orderFormEl = document.getElementById('orderForm');
-  if (orderFormEl) orderFormEl.reset();
-
-  // فتح رابط الواتساب مباشرة برقم العميل وبياناته
-  const whatsappUrl = `https://wa.me/${storeWhatsAppNumber}?text=${whatsappMessage}`;
-  window.open(whatsappUrl, '_blank');
-
-  showToast('تم تجهيز طلبك بنجاح!', 'جاري تحويلك إلى الواتساب لإرسال الطلب');
-  if (phoneEl) phoneEl.focus();
-    return;
-  }
-
- const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (customerEmail && !emailRegex.test(customerEmail)) {
-    showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
-    if (emailEl) emailEl.focus();
-    return;
-  }
-  // Collect size info
-  let sizeText = '—';
-  if (state.sizeMode === 'custom') {
-    const n = document.getElementById('neck-size') ? document.getElementById('neck-size').value : '';
-    const h = document.getElementById('height-size') ? document.getElementById('height-size').value : '';
-    const sh = document.getElementById('shoulder-size') ? document.getElementById('shoulder-size').value : '';
-    const sl = document.getElementById('sleeve-size') ? document.getElementById('sleeve-size').value : '';
-    sizeText = `رقبة ${n || '—'}سم | طول ${h || '—'}سم | كتف ${sh || '—'}سم | أكمام ${sl || '—'}سم`;
-  } else {
-    sizeText = state.selectedSize || '—';
-  }
-
   // Build order payload
   const orderData = {
     customer_name: customerName,
@@ -606,7 +556,7 @@ function submitOrder(event) {
     notes: notes || 'لا توجد ملاحظات'
   };
 
-  // Animate button
+ // Animate button
   const originalBtnHtml = `<span>تأكيد الطلب والإرسال</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>`;
   btn.innerHTML = `<span>جارٍ إرسال الطلب...</span> <div class="loader-dots"><span></span><span></span><span></span></div>`;
   btn.disabled = true;
