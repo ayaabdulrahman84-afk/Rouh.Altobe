@@ -481,7 +481,7 @@ function openOrderModal() {
 function closeOrderModal() {
   const overlay = document.getElementById('orderModal');
   overlay.classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.style.overflow = 'hidden';
 }
 
 // Close modal on backdrop click
@@ -497,7 +497,7 @@ document.addEventListener('keydown', (e) => {
 /* ============================================================
    FORM SUBMISSION (WhatsApp Direct - فتح الواتساب برقم العميل وتفاصيل الطلب)
 ============================================================ */
-function submitOrder(event) {
+   async function submitOrder(event) {
   if (event) event.preventDefault();
   const btn = document.getElementById('confirm-btn');
   if (!btn || btn.disabled) return;
@@ -525,11 +525,13 @@ function submitOrder(event) {
   const cleanPhone = customerPhone.replace(/[^0-9+]/g, '');
   if (!cleanPhone || cleanPhone.length < 8) {
     showToast('رقم الجوال غير مكتمل', 'يرجى إدخال رقم جوال صحيح للتواصل معك عبر واتساب', true);
+     if (phoneEl) phoneEl.focus();
+    return;
   }
 
   // البريد اختياري تماماً ولن يعترض الموقع إن ترك فارغاً
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (customerEmail && !emailRegex.test(customerEmail)) {
+  if (!customerEmail && !emailRegex.test(customerEmail)) {
     showToast('البريد الإلكتروني غير صحيح', 'يرجى إدخال بريد صالح أو ترك الحقل فارغاً', true);
     if (emailEl) emailEl.focus();
     return;
